@@ -13,7 +13,7 @@
 #   - passes SNYK_TOKEN and NVD_API_KEY through when set locally
 set -euo pipefail
 
-WORKSHOP_IMAGE="${WORKSHOP_IMAGE:-noregressions/ydnwys-workshop:0.0.1}"
+WORKSHOP_IMAGE="${WORKSHOP_IMAGE:-noregressions/ydnwys-workshop:0.0.2}"
 
 exec docker run --rm -it \
   --name shipping-workshop \

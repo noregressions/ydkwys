@@ -5,8 +5,12 @@
 #   ./container/publish.sh 0.0.1          build + push both images:
 #                                           noregressions/ydnwys-workshop-base:0.0.1  (+ :latest)
 #                                           noregressions/ydnwys-workshop:0.0.1       (+ :latest)
-#   ./container/publish.sh 0.0.1 --code   skip the base; build the code image on
-#                                         top of the already published base
+#   ./container/publish.sh 0.0.2 --code   skip the base; build the code image on
+#                                         top of the already published base.
+#                                         The base tag defaults to <version>,
+#                                         so when the base is not being
+#                                         rebuilt say which one to build on:
+#   BASE_VERSION=0.0.1 ./container/publish.sh 0.0.2 --code
 #
 # Requirements:
 #   - docker login as an account with write access to the noregressions
@@ -29,18 +33,21 @@ cd "$(dirname "$0")/.."
 REPO=noregressions/ydnwys-workshop
 PLATFORMS=linux/amd64,linux/arm64
 VERSION="${1:?usage: $0 <version> [--code]}"
+# The base is versioned independently: a code-only publish rides on a base
+# that is already out there, which is rarely the version being published.
+BASE_VERSION="${BASE_VERSION:-$VERSION}"
 
 if [[ "${2:-}" != "--code" ]]; then
-  echo "== Building + pushing base image: $REPO-base:$VERSION ($PLATFORMS) =="
+  echo "== Building + pushing base image: $REPO-base:$BASE_VERSION ($PLATFORMS) =="
   docker buildx build --platform "$PLATFORMS" \
     -f container/Dockerfile.base \
-    -t "$REPO-base:$VERSION" -t "$REPO-base:latest" \
+    -t "$REPO-base:$BASE_VERSION" -t "$REPO-base:latest" \
     --push container/
 fi
 
 echo "== Building + pushing workshop image: $REPO:$VERSION ($PLATFORMS) =="
 docker buildx build --platform "$PLATFORMS" \
   -f container/Dockerfile \
-  --build-arg "BASE_IMAGE=$REPO-base:$VERSION" \
+  --build-arg "BASE_IMAGE=$REPO-base:$BASE_VERSION" \
   -t "$REPO:$VERSION" -t "$REPO:latest" \
   --push .

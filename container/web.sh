@@ -15,7 +15,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-WORKSHOP_IMAGE="${WORKSHOP_IMAGE:-noregressions/ydnwys-workshop:0.0.1}"
+WORKSHOP_IMAGE="${WORKSHOP_IMAGE:-noregressions/ydnwys-workshop:0.0.2}"
 WEB_PORT="${WEB_PORT:-7680}"
 TTYD_PORT="${TTYD_PORT:-7681}"
 CONTAINER_NAME="${CONTAINER_NAME:-shipping-workshop-web}"

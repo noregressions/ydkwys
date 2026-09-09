@@ -95,7 +95,7 @@ Validate the environment inside the container:
 
 Requirements: Docker Desktop, or Docker Engine on Linux, with at least 20 GB free disk space.
 
-The first run pulls the published image `noregressions/ydnwys-workshop:0.0.1` (about 2.4 GB) and drops you into a shell:
+The first run pulls the published image `noregressions/ydnwys-workshop:0.0.2` (about 2.4 GB) and drops you into a shell:
 
 ```command
 ./container/run.sh
@@ -115,7 +115,7 @@ runs the same container with the workshop pages and a shell side by side in the
 browser, so a command sits next to the terminal that runs it.
 
 ```command
-WORKSHOP_IMAGE=shipping-workshop:latest ./container/web.sh
+./container/web.sh
 ```
 
 This publishes two ports and opens a browser on the first:
@@ -128,10 +128,6 @@ This publishes two ports and opens a browser on the first:
 The container is the one `run.sh` starts — host Docker socket mounted,
 `SNYK_TOKEN` and `NVD_API_KEY` forwarded when set — so every command behaves
 exactly as it does in a `run.sh` shell. `Ctrl-C` stops both halves.
-
-Route C cannot run this yet: the published `noregressions/ydnwys-workshop:0.0.1`
-image predates the view. Build the image locally first (route B,
-`./container/build.sh`), which is why the command above sets `WORKSHOP_IMAGE`.
 
 ### Opening a Page
 
