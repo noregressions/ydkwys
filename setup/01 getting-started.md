@@ -107,6 +107,78 @@ Validate the environment inside the container:
 ./scripts/tools-check.sh
 ```
 
+## Browser View (Routes B and C)
+
+`./container/run.sh` gives a shell and nothing else: the walkthrough stays in
+your editor, in the PDF, or in a separate browser window. `./container/web.sh`
+runs the same container with the workshop pages and a shell side by side in the
+browser, so a command sits next to the terminal that runs it.
+
+```command
+WORKSHOP_IMAGE=shipping-workshop:latest ./container/web.sh
+```
+
+This publishes two ports and opens a browser on the first:
+
+```text
+7680   split view: a workshop page on the left, a shell on the right
+7681   the shell on its own
+```
+
+The container is the one `run.sh` starts — host Docker socket mounted,
+`SNYK_TOKEN` and `NVD_API_KEY` forwarded when set — so every command behaves
+exactly as it does in a `run.sh` shell. `Ctrl-C` stops both halves.
+
+Route C cannot run this yet: the published `noregressions/ydnwys-workshop:0.0.1`
+image predates the view. Build the image locally first (route B,
+`./container/build.sh`), which is why the command above sets `WORKSHOP_IMAGE`.
+
+### Opening a Page
+
+| Entry point | URL | Use |
+|---|---|---|
+| Split view | `http://localhost:7680` | Choose any page from the list in the header |
+| The book, browsable | `http://localhost:7680/site/index.html` | Read it normally, then press **Open with terminal** on any page to bring a shell alongside that page |
+| A named page | `http://localhost:7680/view?doc=site/cards/s01-spring-node.html` | Goes straight to one lesson; the address follows the page you are reading, so it can be shared |
+
+Every generated page already carries a copy button on each command block. Copy
+there, paste into the shell on the right (`Cmd-V` or `Ctrl-Shift-V`), which also
+leaves room to edit a command before running it.
+
+The shell survives moving between pages: the terminal is not reloaded when the
+left-hand page changes, so a running server or a shell history outlives a jump
+from S01 to S04.
+
+### A Second Shell
+
+Opening `http://localhost:7681` in another browser tab starts a second,
+independent shell in the same container. Scenarios S03, S04 and S05 need this:
+one shell runs the scenario server, the other issues the `curl` requests
+against it.
+
+### Which Pages Are Served
+
+The view serves the generated site produced by the book build (`./build.sh`,
+that is `mvn package`), which is baked into the image when the image is built.
+Rebuilding the book therefore needs a `./container/build.sh` to reach the view.
+
+If the site has not been built at all, the Markdown sources under
+`cheatsheet/`, `scenarios/` and `investigations/` are rendered and served
+instead, and the header says so. The commands are the same either way; the
+formatting and the diagrams are not.
+
+### Options
+
+| Variable | Effect |
+|---|---|
+| `WEB_PORT`, `TTYD_PORT` | Move either port if something on the host already holds it (the scenarios themselves use 3000, 5000, 8080–8083 and 8208) |
+| `NO_BROWSER=1` | Do not open a browser; print the URL only |
+| `CONTAINER_NAME` | Run under a different container name |
+
+```command
+WEB_PORT=9000 TTYD_PORT=9001 ./container/web.sh
+```
+
 ## Container Notes (Routes B and C)
 
 The image provides the preinstalled tools, precompiled scenario targets, and pre-cached vulnerability databases that route A builds locally.

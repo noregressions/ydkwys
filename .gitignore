@@ -26,3 +26,6 @@ results/
 # IDE configuration
 .idea/
 *.iml
+
+# Python bytecode (container/web)
+__pycache__/

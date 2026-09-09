@@ -1,0 +1,140 @@
+/* Styles for /md/** -- a Markdown source served directly, for when the book
+   has not been built. Light, because the generated pages it stands in for
+   are light, and this pane should not change character depending on whether
+   `mvn package` has run. */
+
+:root {
+  --bg: #ffffff;
+  --sunken: #f6f8fa;
+  --line: #d8dee4;
+  --text: #1f2328;
+  --muted: #656d76;
+  --accent: #0969da;
+  --accent-bg: #ddf4ff;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+body.md-page {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 15px/1.6 var(--font);
+}
+
+#content {
+  max-width: 74ch;
+  margin: 0 auto;
+  padding: 28px 30px 45vh;      /* tail room: the last command should reach mid-pane */
+}
+
+.source-note {
+  margin: 0 0 22px;
+  padding: 8px 12px;
+  background: var(--accent-bg);
+  border: 1px solid #b6e3ff;
+  border-radius: 6px;
+  font-size: 12.5px;
+  color: #0a3069;
+}
+
+.oneliner { color: var(--muted); font-style: italic; margin: 0 0 20px; }
+
+#content h1 { font-size: 26px; margin: 0 0 6px; line-height: 1.25; }
+#content h2 {
+  font-size: 20px;
+  margin: 34px 0 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--line);
+}
+#content h3 { font-size: 16px; margin: 26px 0 8px; }
+#content h4 {
+  font-size: 12px;
+  margin: 22px 0 8px;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--muted);
+}
+
+#content p { margin: 12px 0; }
+#content a { color: var(--accent); }
+#content hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
+#content ul, #content ol { margin: 12px 0; padding-left: 24px; }
+#content li { margin: 5px 0; }
+
+#content blockquote {
+  margin: 14px 0;
+  padding: 8px 16px;
+  border-left: 3px solid var(--line);
+  color: var(--muted);
+}
+
+#content code {
+  font: 13px/1.4 var(--mono);
+  background: var(--sunken);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 1px 4px;
+}
+
+.table-wrap { overflow-x: auto; margin: 14px 0; }
+#content table { border-collapse: collapse; font-size: 14px; }
+#content th, #content td {
+  border: 1px solid var(--line);
+  padding: 6px 10px;
+  text-align: left;
+  vertical-align: top;
+}
+#content th { background: var(--sunken); }
+
+/* --- fences ------------------------------------------------------------- */
+
+.block {
+  margin: 14px 0;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  overflow: hidden;
+  background: var(--sunken);
+}
+
+.block-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px 4px 11px;
+  border-bottom: 1px solid var(--line);
+  background: #eef1f4;
+}
+
+.tag {
+  flex: 1;
+  font-size: 10.5px;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.block pre { margin: 0; padding: 11px 13px; overflow-x: auto; font: 13px/1.5 var(--mono); }
+.block pre code { background: none; border: 0; padding: 0; font-size: inherit; white-space: pre; }
+
+/* The copy-me case, called out: half the room reads this on a projector. */
+.block-command { border-color: #adc9e8; }
+.block-command .block-bar { background: var(--accent-bg); }
+.block-command .tag { color: #0a3069; }
+
+.block-output, .block-mermaid { opacity: .82; }
+.block-output pre, .block-mermaid pre { color: var(--muted); }
+
+.copy {
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 3px 11px;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.copy:hover { border-color: var(--accent); color: var(--accent); }
+.copy.done { border-color: #1a7f37; color: #1a7f37; }

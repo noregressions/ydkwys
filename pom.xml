@@ -263,6 +263,7 @@
                                 <title>Part 4 — CVEs Aren't Enough</title>
                                 <includes>
                                     <include>workshop/04-project-health-eol.md</include>
+                                    <include>investigations/T11-herodevs-eol-s01/LESSON.md</include>
                                     <include>workshop/cve-propagation/02-old-release-policies.md</include>
                                     <include>workshop/cve-propagation/03-forks-and-derivatives.md</include>
                                     <include>workshop/cve-propagation/06-what-this-means.md</include>
@@ -474,6 +475,7 @@
                                         <title>Part 4 — CVEs Aren't Enough</title>
                                         <includes>
                                             <include>workshop/04-project-health-eol.md</include>
+                                            <include>investigations/T11-herodevs-eol-s01/LESSON.md</include>
                                             <include>workshop/cve-propagation/02-old-release-policies.md</include>
                                             <include>workshop/cve-propagation/03-forks-and-derivatives.md</include>
                                             <include>workshop/cve-propagation/06-what-this-means.md</include>

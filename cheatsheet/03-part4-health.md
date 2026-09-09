@@ -150,6 +150,61 @@ npm view lodash version
 4.18.1
 ```
 
+### The scan needs an account
+
+`hd scan eol` submits an SBOM to a service, so the CLI has to be logged in.
+Without it every scan fails the same way — `Your CI token has expired` — which
+is an auth failure, not a scenario failure.
+
+```command
+npx @herodevs/cli auth login
+```
+
+For a headless or CI run, provision a token instead:
+
+```command
+npx @herodevs/cli auth provision-ci-token
+```
+
+### T11 — the same question at three boundaries
+
+The investigation behind Step 3: one lifecycle question, asked of a manifest,
+of the built artefact, and of an SBOM.
+
+```command
+cd investigations/T11-herodevs-eol-s01
+./scripts/scan-s01.sh
+./scripts/compare-s01.sh
+```
+
+Captured 2026-09-09 against S01's frontend:
+
+```text
+manifest + installed tree   113 components   5 EOL   2 unknown   1 NES
+built artefact (dist/)        0 components   no report generated
+generated SBOM, re-scanned  113 components   5 EOL   2 unknown   1 NES
+known-EOL control            48 components   5 EOL
+```
+
+The four EOL findings that are build tooling, and the one that is not:
+
+```command
+(cd scenarios/S01-spring-node/frontend && npm ls --omit=dev --all)
+```
+
+```output
+checkout-trace-frontend@1.0.0
+├── lodash@4.17.21
+├─┬ react-dom@18.3.1
+│ ├─┬ loose-envify@1.4.0
+│ │ └── js-tokens@4.0.0
+```
+
+`vite`, `@vitejs/plugin-react`, `lru-cache` and `yallist` are all dev-only.
+`js-tokens@4.0.0` is EOL, undeclared, arrives under React — and ships.
+`lodash@4.17.21` is **not** EOL, carries two CVE records, and is the only row
+in the scan with a support path.
+
 ---
 
 ## Closing Act 2 — one component, three failure modes

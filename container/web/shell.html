@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Workshop view — instructions + terminal</title>
+<link rel="stylesheet" href="/_view/shell.css">
+</head>
+<body>
+<header>
+  <select id="doc" aria-label="Page"></select>
+  <select id="toc" aria-label="Jump to section"><option value="">Jump to…</option></select>
+  <span class="spacer"></span>
+  <span id="status" class="status" role="status" aria-live="polite"></span>
+  <a id="pop" href="#" target="_blank" rel="noopener" title="Open this page on its own">Page only ↗</a>
+  <button id="reconnect" type="button" title="Reload the terminal pane">Reconnect shell</button>
+</header>
+
+<main>
+  <section id="pane" aria-label="Instructions">
+    <iframe id="page" title="Instructions" allow="clipboard-write; clipboard-read"></iframe>
+  </section>
+  <div id="drag" role="separator" aria-orientation="vertical" title="Drag to resize (double-click to reset)"></div>
+  <section id="term" aria-label="Terminal">
+    <iframe id="tty" title="Container shell"></iframe>
+  </section>
+</main>
+
+<script src="/_view/shell.js"></script>
+</body>
+</html>

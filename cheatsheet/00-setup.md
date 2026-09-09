@@ -35,6 +35,25 @@ Or build the image locally first, then run the image you built.
 WORKSHOP_IMAGE=shipping-workshop:latest ./container/run.sh
 ```
 
+#### Browser View
+
+Instructions and a shell side by side in the browser, in the same container
+`run.sh` uses. Needs a locally built image; the published one predates it.
+```command
+WORKSHOP_IMAGE=shipping-workshop:latest ./container/web.sh
+```
+
+Opens `http://localhost:7680`. Browse the book at
+`http://localhost:7680/site/index.html` and press **Open with terminal** on any
+page to get that page beside a shell. A second tab on `http://localhost:7681`
+is a second, independent shell — which is what S03/S04/S05 want, one shell for
+the server and one for the `curl`. `Ctrl-C` stops it.
+
+Move the ports if something already holds them.
+```command
+WEB_PORT=9000 TTYD_PORT=9001 ./container/web.sh
+```
+
 ### House Keeping
 
 Every `run.sh` has a matching `stop.sh`, and `run.sh` refuses to start if an preclaimed

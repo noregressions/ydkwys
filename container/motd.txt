@@ -12,4 +12,8 @@
 
   S03/S04/S05 servers bind inside this container — use the curl
   commands from WORKSHOP.md in this shell, exactly as printed.
+
+  Want the instructions beside this shell? Exit, and on the HOST run
+  ./container/web.sh instead of ./container/run.sh — the workshop
+  pages on one side, a terminal on the other, in your browser.
 =====================================================================

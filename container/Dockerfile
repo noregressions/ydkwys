@@ -64,8 +64,28 @@ RUN scenarios/S08-extended-sbom/scripts/seed-plugin.sh \
 
 # --- final: the whole repository on top of the prewarmed tree -----------------
 FROM build
+
+# ttyd serves the terminal half of the browser workshop view
+# (container/web/, launched by container/web.sh). A static musl binary with
+# xterm.js baked into it, so the view needs no network once the image is
+# built -- which matters on workshop wifi.
+#
+# It lives here rather than in Dockerfile.base, where a tool would normally
+# go, so that adding the view costs a small code-image layer instead of a
+# base rebuild and its multi-gigabyte scanner-database refresh. Move it up to
+# the base at the next base refresh. Before the COPY below, so editing a
+# lesson does not re-download it.
+ARG TTYD_VERSION=1.7.7
+RUN arch=$(dpkg --print-architecture) \
+    && case "$arch" in amd64) t=x86_64 ;; arm64) t=aarch64 ;; *) echo "unsupported arch: $arch" >&2; exit 1 ;; esac \
+    && curl -fsSL -o /usr/local/bin/ttyd \
+      "https://github.com/tsl0922/ttyd/releases/download/${TTYD_VERSION}/ttyd.${t}" \
+    && chmod +x /usr/local/bin/ttyd \
+    && ttyd --version
+
 COPY . /workshop
-RUN chmod +x scripts/*.sh scenarios/*/scripts/*.sh investigations/*/scripts/*.sh
+RUN chmod +x scripts/*.sh scenarios/*/scripts/*.sh investigations/*/scripts/*.sh \
+      container/web/start.sh container/web/serve.py
 
 COPY container/motd.txt /etc/workshop-motd
 RUN echo 'cat /etc/workshop-motd' >> /root/.bashrc
