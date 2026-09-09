@@ -337,7 +337,7 @@
                             <goal>build</goal>
                         </goals>
                         <configuration>
-                            <output>${project.build.directory}/book.pdf</output>
+                            <output>${project.build.directory}/pdfs/book.pdf</output>
                             <!-- The pre-renderer HTML, for checking what the
                                  layout actually produced (card classes,
                                  badges, dividers) without opening the PDF. -->
@@ -545,7 +545,7 @@
                             <goal>build</goal>
                         </goals>
                         <configuration>
-                            <output>${project.build.directory}/cheatsheets.pdf</output>
+                            <output>${project.build.directory}/pdfs/cheatsheets.pdf</output>
                             <emitHtml>${project.build.directory}/cheatsheets.html</emitHtml>
                             <book combine.self="override">
                                 <root>${project.basedir}</root>
