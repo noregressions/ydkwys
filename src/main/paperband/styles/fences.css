@@ -1,0 +1,18 @@
+/* =============================================================================
+ * Fence wrapping for syntax-highlighted code.
+ *
+ * The theme wraps long fence lines (pre { white-space: pre-wrap;
+ * overflow-wrap: anywhere }) so nothing clips at the page edge in print. But
+ * Prism's CDN stylesheet sets `white-space: pre` on language-tagged fences
+ * (pre[class*="language-"]), which outranks the theme's bare `pre` rule — so
+ * a long single-line ```bash command clips where a ```text block wraps.
+ * Restore the theme's intent for highlighted fences; this book stylesheet
+ * layer inlines after the Prism link, so the same-specificity rule below wins
+ * by document order.
+ * ===========================================================================*/
+
+pre[class*="language-"],
+code[class*="language-"] {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}

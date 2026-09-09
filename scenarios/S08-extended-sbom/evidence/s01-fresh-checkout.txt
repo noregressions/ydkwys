@@ -1,0 +1,16 @@
+# S01, fresh checkout (packaged, not installed): sibling module unresolved
+{"components":265,"scopes":{"excluded":230,"required":35}}
+rows=642 BOM=1 BUILD_TOOLING=569 MAIN_BUILD=72 unresolved=1
+
+# unresolved:
+[
+  {
+    "coordinate": {
+      "groupId": "dev.noregressions.trace",
+      "artifactId": "normalizer",
+      "version": "1.0.0"
+    },
+    "scope": "compile",
+    "reason": "Could not find artifact dev.noregressions.trace:normalizer:jar:1.0.0 in central (https://repo.maven.apache.org/maven2)"
+  }
+]

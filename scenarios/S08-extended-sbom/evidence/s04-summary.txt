@@ -1,0 +1,26 @@
+===== S04: what each SBOM says =====
+standard : 0 components    specVersion=1.6
+extended : 171 components  excluded=171  specVersion=1.5
+SBOM+ report: 194 rows across 1 module(s)  BUILD_TOOLING=194  unresolved=0
+
+-- The S04 tracers --
+standard SBOM:
+   (absent)
+extended SBOM:
+   trace-injector-maven-plugin  1.0.0  excluded  pkg:maven/dev.noregressions.trace/trace-injector-maven-plugin@1.0.0?type=maven-plugin
+   trace-route-payload          1.0.0  excluded  pkg:maven/dev.noregressions.trace/trace-route-payload@1.0.0
+SBOM+ report (origin, scope, path):
+   maven-plugin-hidden-content  BUILD_TOOLING  plugin             dev.noregressions.trace:trace-injector-maven-plugin:1.0.0  (declared directly)
+   maven-plugin-hidden-content  BUILD_TOOLING  plugin-transitive  dev.noregressions.trace:trace-route-payload:1.0.0          via trace-injector-maven-plugin
+
+-- Build tooling the extended SBOM records that the standard one cannot (first 10) --
+   maven-clean-plugin:3.2.0
+   maven-compiler-plugin:3.14.1
+   maven-deploy-plugin:3.1.4
+   maven-install-plugin:3.1.4
+   maven-jar-plugin:3.4.2
+   maven-resources-plugin:3.4.0
+   maven-site-plugin:3.12.1
+   maven-surefire-plugin:3.5.4
+   trace-injector-maven-plugin:1.0.0
+   ... 194 BUILD_TOOLING rows in total

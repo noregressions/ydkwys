@@ -1,0 +1,44 @@
+===== S01: what each SBOM says =====
+standard : 38 components  (no scope)=2  required=36  specVersion=1.6
+extended : 267 components  excluded=230  required=37  specVersion=1.5
+SBOM+ report: 644 rows across 3 module(s)  BOM=1  BUILD_TOOLING=569  MAIN_BUILD=74  unresolved=0
+
+-- The S01 tracers, plus the tooling that shaped them --
+standard SBOM:
+   commons-codec     1.17.1  required  pkg:maven/commons-codec/commons-codec@1.17.1?type=jar
+   commons-codec     1.18.0  required  pkg:maven/commons-codec/commons-codec@1.18.0?type=jar
+   jackson-databind  2.19.4  required  pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.19.4?type=jar
+   normalizer        1.0.0   -         pkg:maven/dev.noregressions.trace/normalizer@1.0.0?type=jar
+extended SBOM:
+   commons-codec             1.11    excluded  pkg:maven/commons-codec/commons-codec@1.11
+   commons-codec             1.17.1  required  pkg:maven/commons-codec/commons-codec@1.17.1
+   commons-codec             1.18.0  required  pkg:maven/commons-codec/commons-codec@1.18.0
+   commons-codec             1.19.0  excluded  pkg:maven/commons-codec/commons-codec@1.19.0
+   jackson-databind          2.19.4  required  pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.19.4
+   maven-shade-plugin        3.6.0   excluded  pkg:maven/org.apache.maven.plugins/maven-shade-plugin@3.6.0
+   maven-shade-plugin        3.6.2   excluded  pkg:maven/org.apache.maven.plugins/maven-shade-plugin@3.6.2?type=maven-plugin
+   normalizer                1.0.0   required  pkg:maven/dev.noregressions.trace/normalizer@1.0.0
+   spring-boot-dependencies  3.5.12  excluded  pkg:maven/org.springframework.boot/spring-boot-dependencies@3.5.12?type=pom
+SBOM+ report (module, origin, scope, coordinate, path):
+   normalizer                       BUILD_TOOLING  plugin             org.apache.maven.plugins:maven-shade-plugin:3.6.2         (declared directly)
+   normalizer                       BUILD_TOOLING  plugin-transitive  commons-codec:commons-codec:1.11                          via maven-site-plugin > doxia-core > httpclient
+   normalizer                       BUILD_TOOLING  plugin-transitive  commons-codec:commons-codec:1.19.0                        via maven-jar-plugin > plexus-archiver > commons-compress
+   normalizer                       MAIN_BUILD     compile            commons-codec:commons-codec:1.17.1                        (declared directly)
+   service                          BUILD_TOOLING  plugin-transitive  com.fasterxml.jackson.core:jackson-databind:2.19.4        via spring-boot-maven-plugin > spring-boot-buildpack-platform
+   service                          BUILD_TOOLING  plugin-transitive  commons-codec:commons-codec:1.11                          via maven-site-plugin > doxia-core > httpclient
+   service                          BUILD_TOOLING  plugin-transitive  commons-codec:commons-codec:1.17.1                        via spring-boot-maven-plugin > spring-boot-buildpack-platform > commons-compress
+   service                          BUILD_TOOLING  plugin-transitive  commons-codec:commons-codec:1.19.0                        via maven-jar-plugin > plexus-archiver > commons-compress
+   service                          BUILD_TOOLING  plugin-transitive  org.apache.maven.plugins:maven-shade-plugin:3.6.0         via spring-boot-maven-plugin
+   service                          MAIN_BUILD     compile            com.fasterxml.jackson.core:jackson-databind:2.19.4        (declared directly)
+   service                          MAIN_BUILD     compile            commons-codec:commons-codec:1.18.0                        via normalizer
+   service                          MAIN_BUILD     compile            dev.noregressions.trace:normalizer:1.0.0                  (declared directly)
+   software-supply-chain-trace-lab  BOM            import             org.springframework.boot:spring-boot-dependencies:3.5.12  (declared directly)
+   software-supply-chain-trace-lab  BUILD_TOOLING  plugin-transitive  commons-codec:commons-codec:1.11                          via maven-site-plugin > doxia-core > httpclient
+
+-- Components only one of them lists --
+   only in standard : dev.noregressions.trace:service:1.0.0 
+   only in extended : 230 (build tooling and the BOM import)
+   in both          : 37
+
+-- Unresolved (SBOM+ resolves from repositories, not from the reactor) --
+   none

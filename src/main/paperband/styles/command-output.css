@@ -1,0 +1,180 @@
+/* =============================================================================
+ * Command versus output.
+ *
+ * The theme distinguishes ```command from ```output with a left border and an
+ * eyebrow label, but both sit on the same surface, so at a glance down a page
+ * of a cheat sheet they read as one undifferentiated stack of grey boxes. The
+ * reader's question is always "is this what I type, or what I should see?",
+ * and it should be answerable from across the desk.
+ *
+ * Commands take a brand tint — they are the thing you act on, so they come
+ * forward. Output stays neutral and recedes. Both keep their labels and
+ * borders, so the distinction survives greyscale printing, where the tint
+ * differences collapse.
+ * ===========================================================================*/
+
+pre.command {
+  background: var(--nr-brand-soft);
+  border-color: #cddffb;
+  border-left-width: 3px;
+}
+
+pre.output {
+  background: var(--nr-surface-strong);
+  border-color: var(--nr-line);
+  border-left: 3px solid var(--nr-line-strong);
+  color: var(--nr-text);
+}
+
+/* Investigation cards recolour command furniture to the instrument hue; keep
+   the tint in step with the border so the two do not disagree. */
+article.card.kind-investigation pre.command {
+  background: var(--nr-info-soft);
+  border-color: #cbe9f1;
+}
+
+/* -----------------------------------------------------------------------------
+ * Cheat sheet: buy back characters per line.
+ *
+ * The print column is fixed at 42rem, which fits roughly 55 monospace
+ * characters at the theme's code size. A third of the commands in the cheat
+ * sheet are longer than that, and a wrapped command is a command that cannot
+ * be copied and pasted — the break lands mid-token and the paste runs half a
+ * command. Dropping the code a step here widens the column to about 68
+ * characters. Long commands are additionally pre-wrapped at the source with
+ * backslash continuations, so what wraps is a deliberate, paste-safe break.
+ *
+ * Scoped to the cheat-sheet cards: the manual is read, not typed from, and
+ * keeps the theme's reading size.
+ * -------------------------------------------------------------------------- */
+article.card[id^="card-cheatsheet-"] pre.command,
+article.card[id^="card-cheatsheet-"] pre.command code,
+article.card[id^="card-cheatsheet-"] pre.output,
+article.card[id^="card-cheatsheet-"] pre.output code {
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+/* Reclaim the card's side padding. Command and output must bleed by the same
+   amount or the joined slab below steps in and out at the seam. */
+article.card[id^="card-cheatsheet-"] pre.command,
+article.card[id^="card-cheatsheet-"] pre.output {
+  margin-left: -0.6rem;
+  margin-right: -0.6rem;
+}
+
+/* -----------------------------------------------------------------------------
+ * A step is three things: what you are about to do, the command, and what it
+ * should print. Markdown gives them to us as three siblings with no wrapper,
+ * so they are bound with spacing and shape instead of a box — the heading sits
+ * tight on its command, the command and its output join into a single slab,
+ * and all the whitespace moves to the gap *between* steps. The reader should
+ * be able to see where one step ends without reading a word of it.
+ *
+ * :has() does the work; Chromium renders these books, so it is available. If a
+ * renderer without it is ever used, the fallback is today's appearance rather
+ * than a broken one.
+ * -------------------------------------------------------------------------- */
+
+/* Command and its output become one slab. */
+pre.command:has(+ pre.output) {
+  margin-bottom: 0;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  border-bottom: 0;
+}
+
+pre.command + pre.output {
+  margin-top: 0;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+/* The step heading: the paragraph immediately before a command. Scoped to the
+   cheat sheet, where those paragraphs are terse labels. In the manual the same
+   position holds real prose, which should stay prose.
+
+   Sized up rather than marked up: these are sentences, not headings, so making
+   them h4s in the source would put a hundred-odd sentences in the outline and
+   the TOC. The size is the point of the rule. At the theme's 0.85rem this label
+   came out smaller than the body prose it sits among (0.95rem) and barely above
+   the 0.8rem command under it, so the thing you are about to do read as a
+   caption for the command rather than the instruction it is. 1rem bold puts it
+   a clear step above the command and level with prose, while the section h2
+   (1.05rem, with its marker bar and rule) stays unmistakably the heading. */
+article.card[id^="card-cheatsheet-"] p:has(+ pre.command) {
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--nr-ink);
+  margin-top: 1.75rem;
+  margin-bottom: 0.4rem;
+}
+
+/* Bind the heading to the command it introduces. */
+article.card[id^="card-cheatsheet-"] p:has(+ pre.command) + pre.command {
+  margin-top: 0;
+}
+
+/* A step that opens a section should not push away from the heading above it. */
+article.card[id^="card-cheatsheet-"] h2 + p:has(+ pre.command),
+article.card[id^="card-cheatsheet-"] h3 + p:has(+ pre.command),
+article.card[id^="card-cheatsheet-"] h4 + p:has(+ pre.command),
+article.card[id^="card-cheatsheet-"] hr + p:has(+ pre.command) {
+  margin-top: 0.9rem;
+}
+
+/* The group of steps: "Declared versions", "lodash in the bundle", the h4s
+   inside a stop. They were bold paragraphs, which the theme leaves at prose
+   size — so once the step label above grew to 1rem they were the smaller of
+   the two, and a group read as subordinate to the steps it contains. Take them
+   a step above the label, and give them the hairline that a bold paragraph
+   could not have: on a sheet you are typing from, the rule is where your eye
+   stops when it has lost the place. */
+article.card[id^="card-cheatsheet-"] section.block > h4 {
+  font-size: 1.12rem;
+  font-weight: 700;
+  line-height: 1.25;
+  margin: 2.2rem 0 0.55rem;
+  padding-bottom: 0.22rem;
+  border-bottom: 1px solid var(--nr-line);
+}
+
+/* Which drags the levels above it up too: the theme's ladder (h2 1.05rem,
+   h3 0.98, h4 0.9) is tuned for prose chapters, where the largest thing on a
+   page is a heading. A cheat-sheet page is mostly step labels and command
+   slabs, so at theme sizes a stop heading came out *smaller* than the group
+   header inside it. Respace the whole ladder in one place, widest first, so
+   stop > group > step > command holds all the way down the sheet. */
+article.card[id^="card-cheatsheet-"] section.block > h2 {
+  font-size: 1.32rem;
+}
+article.card[id^="card-cheatsheet-"] section.block > h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-top: 2rem;
+}
+
+/* -----------------------------------------------------------------------------
+ * Keep a step whole across a page break.
+ *
+ * The theme already avoids breaking inside a pre and keeps headings with what
+ * follows, but a step's heading is an ordinary paragraph, so nothing stopped a
+ * page ending on "Ask Maven which version the service resolved." with the
+ * command it introduces stranded overleaf. A label with no command under it is
+ * worse than useless on a sheet you are typing from.
+ * -------------------------------------------------------------------------- */
+@media print {
+  /* The step heading stays with its command. */
+  article.card[id^="card-cheatsheet-"] p:has(+ pre.command) {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  /* A command stays with the output it produces. */
+  pre.command:has(+ pre.output) {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+}

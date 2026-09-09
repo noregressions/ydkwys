@@ -1,0 +1,4 @@
+.git
+trace-output
+frontend/node_modules
+**/target/*.original

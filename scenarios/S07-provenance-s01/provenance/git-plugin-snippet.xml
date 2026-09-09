@@ -1,0 +1,29 @@
+<!--
+  Add this plugin to service/pom.xml, just before the spring-boot-maven-plugin.
+  It writes BOOT-INF/classes/git.properties into the fat JAR at build time, so
+  the commit that produced the artefact travels inside the artefact.
+-->
+<plugin>
+  <groupId>io.github.git-commit-id</groupId>
+  <artifactId>git-commit-id-maven-plugin</artifactId>
+  <version>9.0.1</version>
+  <executions>
+    <execution>
+      <id>get-the-git-infos</id>
+      <goals><goal>revision</goal></goals>
+      <phase>initialize</phase>
+    </execution>
+  </executions>
+  <configuration>
+    <useNativeGit>true</useNativeGit>
+    <generateGitPropertiesFile>true</generateGitPropertiesFile>
+    <includeOnlyProperties>
+      <property>git.commit.id.full</property>
+      <property>git.commit.id.abbrev</property>
+      <property>git.branch</property>
+      <property>git.build.time</property>
+      <property>git.remote.origin.url</property>
+    </includeOnlyProperties>
+    <failOnNoGitDirectory>false</failOnNoGitDirectory>
+  </configuration>
+</plugin>

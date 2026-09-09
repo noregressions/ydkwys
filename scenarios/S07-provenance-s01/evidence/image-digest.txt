@@ -1,0 +1,1 @@
+localhost:5000/checkout-service@sha256:905a374614f3d7a42b67b4ebe21b200ea021efab0990d932fc0107ac43660311

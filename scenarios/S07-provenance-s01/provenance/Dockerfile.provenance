@@ -1,0 +1,19 @@
+FROM eclipse-temurin:21-jre-jammy
+
+ARG GIT_COMMIT
+ARG GIT_SOURCE
+ARG BUILD_TIME
+ARG VERSION
+
+LABEL org.opencontainers.image.revision="${GIT_COMMIT}" \
+      org.opencontainers.image.source="${GIT_SOURCE}" \
+      org.opencontainers.image.created="${BUILD_TIME}" \
+      org.opencontainers.image.version="${VERSION}" \
+      org.opencontainers.image.title="checkout-service" \
+      org.opencontainers.image.vendor="HeroDevs KCDC workshop"
+
+WORKDIR /app
+COPY service/target/service-1.0.0.jar /app/checkout-service.jar
+EXPOSE 8080
+USER 10001
+ENTRYPOINT ["java", "-jar", "/app/checkout-service.jar"]

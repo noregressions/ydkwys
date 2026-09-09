@@ -1,0 +1,52 @@
+{
+  "metadata": {
+    "tools": {
+      "components": [
+        {
+          "type": "application",
+          "group": "dev.noregressions",
+          "name": "sbom-plus-maven-plugin",
+          "version": "1.0.0"
+        }
+      ]
+    }
+  },
+  "sample": [
+    {
+      "type": "library",
+      "bom-ref": "pkg:maven/org.springframework.boot/spring-boot-dependencies@3.5.12?type=pom",
+      "group": "org.springframework.boot",
+      "name": "spring-boot-dependencies",
+      "version": "3.5.12",
+      "scope": "excluded",
+      "purl": "pkg:maven/org.springframework.boot/spring-boot-dependencies@3.5.12?type=pom"
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:maven/org.apache.maven.plugins/maven-shade-plugin@3.6.2?type=maven-plugin",
+      "group": "org.apache.maven.plugins",
+      "name": "maven-shade-plugin",
+      "version": "3.6.2",
+      "scope": "excluded",
+      "purl": "pkg:maven/org.apache.maven.plugins/maven-shade-plugin@3.6.2?type=maven-plugin"
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.19.4",
+      "group": "com.fasterxml.jackson.core",
+      "name": "jackson-databind",
+      "version": "2.19.4",
+      "scope": "required",
+      "purl": "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.19.4"
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:maven/org.apache.maven.plugins/maven-shade-plugin@3.6.0",
+      "group": "org.apache.maven.plugins",
+      "name": "maven-shade-plugin",
+      "version": "3.6.0",
+      "scope": "excluded",
+      "purl": "pkg:maven/org.apache.maven.plugins/maven-shade-plugin@3.6.0"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+=====================================================================
+  You Don't Know What You're Shipping — workshop container
+=====================================================================
+  Everything is preinstalled and prebuilt. Start here:
+
+    ./scripts/tools-check.sh      confirm the toolchain (should be green)
+    cat WORKSHOP.md               the route — or read the book PDF
+
+  Docker commands here drive the HOST daemon (mounted socket), so
+  S01/S02 images appear on your machine and their published ports are
+  reachable from your own browser.
+
+  S03/S04/S05 servers bind inside this container — use the curl
+  commands from WORKSHOP.md in this shell, exactly as printed.
+=====================================================================

@@ -1,0 +1,72 @@
+/* =============================================================================
+ * Kind identity — scenario walkthroughs vs tool investigations.
+ *
+ * The `kind` axis (declared in pom.xml, valued by the folder paperband.yaml
+ * files in scenarios/ and investigations/) stamps `kind-scenario` or
+ * `kind-investigation` on each card's <article> and renders a badge in the
+ * meta row. This layer inlines after the noregressions theme, so it only
+ * recolours the furniture that carries chapter identity.
+ *
+ * The grammar it adds, within the theme's "each hue means one thing" rule:
+ *
+ *   brand blue   scenario walkthrough — you are building and tracing
+ *   instrument   investigation — you are pointing a tool at a boundary
+ *   theme teal   (unchanged default) narrative chapters: setup, workshop parts
+ *
+ * A reader opening the printed book mid-document should know which mode the
+ * page is in from the badge, the title rule, and the section markers alone.
+ * ===========================================================================*/
+
+:root {
+  /* The instrument hue: violet, unused by the theme's semantic palette
+   * (blue = navigation/reference, teal = info, green = tips, amber = warning,
+   * red = danger), so investigations read as their own thing rather than as
+   * one of those. */
+  --nr-instrument: #6d28d9;
+  --nr-instrument-dark: #4c1d95;
+  --nr-instrument-soft: #f4f0fd;
+}
+
+/* ── Chapter opener: the title rule carries the kind ─────────────────────── */
+article.card.kind-scenario > h1.card-title {
+  border-bottom: 2px solid var(--nr-brand);
+}
+article.card.kind-investigation > h1.card-title {
+  border-bottom: 2px solid var(--nr-instrument);
+}
+
+/* ── Kind badge: "SCENARIO" / "INVESTIGATION" in the meta row ────────────── */
+article.card.kind-scenario .axis-badge-kind {
+  color: var(--nr-brand);
+  background: var(--nr-brand-soft);
+  border-color: color-mix(in srgb, var(--nr-brand) 30%, white);
+}
+article.card.kind-investigation .axis-badge-kind {
+  color: var(--nr-instrument);
+  background: var(--nr-instrument-soft);
+  border-color: color-mix(in srgb, var(--nr-instrument) 30%, white);
+}
+
+/* ── Section markers: the small bar before every recurring h2 ────────────── */
+article.card.kind-scenario section.block > h2::before {
+  background: var(--nr-brand);
+}
+article.card.kind-investigation section.block > h2::before {
+  background: var(--nr-instrument);
+}
+
+/* ── Command fences: which mode ran this? ────────────────────────────────
+ * The theme already colours pre.command brand-blue, which is the scenario
+ * voice; investigations take the instrument hue. Output stays neutral grey
+ * in both — output is the machine's, not the mode's. */
+article.card.kind-investigation pre.command {
+  border-left-color: var(--nr-instrument);
+}
+article.card.kind-investigation pre.command::before {
+  color: var(--nr-instrument);
+}
+
+/* ── Links inside investigation cards keep the theme's brand blue ─────────
+ * deliberately: blue means navigation everywhere in the book, and the kind
+ * system recolours identity furniture only. (No rule needed — documented so
+ * nobody "completes" this later.) */

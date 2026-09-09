@@ -1,0 +1,6 @@
+# Folder-cascaded vars: every card under investigations/ is a tool
+# investigation. The book's `kind` axis (declared in the root pom.xml) picks
+# this up for any card that doesn't set `kind:` in its own frontmatter, and the
+# kind stylesheet (src/main/paperband/styles/kind.css) styles from it.
+vars:
+  kind: investigation

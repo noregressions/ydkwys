@@ -1,0 +1,36 @@
+{
+  "note": "excerpt \u2014 full SBOM has 5040 components (JVM deps + base-image OS packages)",
+  "total_components": 5040,
+  "tracers": [
+    {
+      "name": "commons-codec",
+      "version": "1.17.1",
+      "purl": "pkg:maven/commons-codec/commons-codec@1.17.1"
+    },
+    {
+      "name": "commons-codec",
+      "version": "1.18.0",
+      "purl": "pkg:maven/commons-codec/commons-codec@1.18.0"
+    },
+    {
+      "name": "jackson-databind",
+      "version": "2.19.4",
+      "purl": "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.19.4"
+    },
+    {
+      "name": "normalizer",
+      "version": "1.0.0",
+      "purl": "pkg:maven/dev.noregressions.trace/normalizer@1.0.0"
+    },
+    {
+      "name": "spring-boot",
+      "version": "3.5.12",
+      "purl": "pkg:maven/org.springframework.boot/spring-boot@3.5.12"
+    },
+    {
+      "name": "tomcat-embed-core",
+      "version": "10.1.52",
+      "purl": "pkg:maven/org.apache.tomcat.embed/tomcat-embed-core@10.1.52"
+    }
+  ]
+}

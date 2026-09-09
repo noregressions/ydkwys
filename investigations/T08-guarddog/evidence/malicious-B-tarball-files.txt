@@ -1,0 +1,3 @@
+package/dist/index.js
+package/package.json
+package/dist/prepack-evidence.json

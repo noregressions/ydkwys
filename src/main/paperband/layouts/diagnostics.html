@@ -1,0 +1,17 @@
+<section style="font: 9px/1.4 monospace; break-before: page;">
+    <h1>Diagnostics — {{ book.title }} ({{ target }}, {{ size }})</h1>
+    <p>content height {{ contentHeightMm }}mm, measure {{ measure }}</p>
+
+    <h2>vars</h2>
+    {% for e in vars %}<div>{{ e.key }} = {{ e.value }}</div>{% endfor %}
+
+    <h2>{{ cards | length }} cards</h2>
+    {% for c in cards %}
+    <div><b>{{ c.id }}</b> "{{ c.title }}" — {{ c.source }}
+        {% for f in c.frontmatter %}({{ f.key }}={{ f.value }}){% endfor %}</div>
+    {% endfor %}
+
+    <h2>sections</h2>
+    {% for s in sections %}<div>{{ s.id }}: "{{ s.label }}", {{ s.count }} cards,
+    template {{ s.landingTemplate }}, page={{ s.landingPage }}</div>{% endfor %}
+</section>

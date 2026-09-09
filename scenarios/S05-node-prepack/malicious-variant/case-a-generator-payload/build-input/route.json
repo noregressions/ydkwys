@@ -1,0 +1,5 @@
+{
+  "path": "/hidden/prepack-info",
+  "message": "generated at pack time by prepack",
+  "origin": "trace-route-package build-input/route.json"
+}

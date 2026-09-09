@@ -1,0 +1,22 @@
+/* =============================================================================
+ * Mermaid diagram typography.
+ *
+ * Mermaid marks up its HTML node/edge labels with class="label", which
+ * collides with the noregressions theme's structural-label rule (.eyebrow,
+ * .kicker, .label: uppercase, brand blue, letter-spaced). Diagram text is
+ * content, not furniture — and uppercasing it misrepresents case-sensitive
+ * file paths and package names ("dist/index.js" is not "DIST/INDEX.JS").
+ * Restore it. Sized explicitly rather than inherited: mermaid measures label
+ * text as it lays the diagram out, so the size must be stable at render time.
+ * ===========================================================================*/
+
+pre.mermaid .label,
+pre.mermaid .nodeLabel,
+pre.mermaid .edgeLabel {
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--nr-ink);
+}

@@ -1,0 +1,8 @@
+{
+    "org.opencontainers.image.created": "2026-08-25T09:16:09Z",
+    "org.opencontainers.image.revision": "9d82b4d94d90df9201c920b4ac11acc2891a41d8",
+    "org.opencontainers.image.source": "https://github.com/herodevs/kcdc2026workshop.git",
+    "org.opencontainers.image.title": "checkout-service",
+    "org.opencontainers.image.vendor": "HeroDevs KCDC workshop",
+    "org.opencontainers.image.version": "1.0.0"
+}

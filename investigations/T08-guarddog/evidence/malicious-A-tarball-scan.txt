@@ -1,0 +1,7 @@
+WARNING: Scanning without kernel-level sandbox protection.
+No risks found in mal/out/CASE-A-generator-payload.tgz
+
+
+────────────────────────────────────────
+Assessment:  No risks detected  (0.0/10)
+0 risks detected

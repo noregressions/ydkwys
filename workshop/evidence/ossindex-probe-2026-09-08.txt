@@ -1,0 +1,8 @@
+# Probe of ossindex.sonatype.org, 2026-09-08
+
+## Web UI
+HTTP/2 301 
+location: https://guide.sonatype.com/
+
+## API: component-report, unauthenticated
+HTTP 401

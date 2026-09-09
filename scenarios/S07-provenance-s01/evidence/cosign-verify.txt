@@ -1,0 +1,8 @@
+
+Verification for localhost:5000/checkout-service@sha256:905a374614f3d7a42b67b4ebe21b200ea021efab0990d932fc0107ac43660311 --
+The following checks were performed on each of these signatures:
+  - The cosign claims were validated
+  - Existence of the claims in the transparency log was verified offline
+  - The signatures were verified against the specified public key
+
+[{"critical":{"identity":{"docker-reference":"localhost:5000/checkout-service@sha256:905a374614f3d7a42b67b4ebe21b200ea021efab0990d932fc0107ac43660311"},"image":{"docker-manifest-digest":"sha256:905a374614f3d7a42b67b4ebe21b200ea021efab0990d932fc0107ac43660311"},"type":"https://cyclonedx.org/bom"},"optional":{}},{"critical":{"identity":{"docker-reference":"localhost:5000/checkout-service@sha256:905a374614f3d7a42b67b4ebe21b200ea021efab0990d932fc0107ac43660311"},"image":{"docker-manifest-digest":"sha256:905a374614f3d7a42b67b4ebe21b200ea021efab0990d932fc0107ac43660311"},"type":"https://sigstore.dev/cosign/sign/v1"},"optional":{}}]

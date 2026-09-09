@@ -1,0 +1,4 @@
+guarddog 3.2.0
+python  3.11.15
+semgrep installed as a guarddog dependency
+captured 2026-08-24T (container run; --no-sandbox)

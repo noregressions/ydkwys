@@ -1,0 +1,6 @@
+Metadata-Version: 2.1
+Name: reportkit
+Version: 1.0.0
+Summary: Direct dependency for the Python trace lab
+Requires-Python: >=3.11
+Requires-Dist: tracehook-demo==1.0.0

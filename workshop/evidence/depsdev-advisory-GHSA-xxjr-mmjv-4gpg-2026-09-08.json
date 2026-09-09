@@ -1,0 +1,1 @@
+{"advisoryKey":{"id":"GHSA-xxjr-mmjv-4gpg"}, "url":"https://osv.dev/vulnerability/GHSA-xxjr-mmjv-4gpg", "title":"Lodash has Prototype Pollution Vulnerability in `_.unset` and `_.omit` functions", "aliases":["CVE-2025-13465", "CVE-2026-2950", "GHSA-f23m-r3pf-42rh"], "cvss3Score":6.5, "cvss3Vector":"CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:L/A:L"}

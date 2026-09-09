@@ -1,0 +1,17 @@
+/*
+ * Screen-only reading measure for the book HTML opened in a browser.
+ *
+ * The print layer fixes the card column at 42rem, a line length chosen for
+ * a 210mm sheet. On a wide display, with the 18rem sidebar beside it, that
+ * leaves the page mostly margin. Widen the column for screens only: the
+ * PDF renderer never matches `screen`, so paper keeps its measure, and the
+ * cap still keeps prose readable on very wide windows.
+ */
+@media screen {
+  :root { --card-max-width: min(64rem, calc(100vw - 20rem)); }
+  article.card { padding-left: 2rem; padding-right: 2rem; }
+}
+@media screen and (max-width: 64rem) {
+  /* No sidebar below this width, so give the column the full viewport. */
+  :root { --card-max-width: calc(100vw - 2rem); }
+}

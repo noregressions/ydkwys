@@ -1,0 +1,10 @@
+{
+  "name": "node-prepack-trace-lab",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Supply-chain trace lab for npm prepack-generated content",
+  "main": "src/server.js",
+  "dependencies": {
+    "trace-route-package": "file:npm-repo/trace-route-package-1.0.0.tgz"
+  }
+}

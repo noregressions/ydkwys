@@ -1,0 +1,183 @@
+# The TOOLS image: every tool and scanner database, no workshop code.
+# Rebuilt rarely (bump a tool, refresh the vulnerability databases —
+# rebuild close to workshop day so the DBs are fresh).
+#
+# The workshop code image (container/Dockerfile) builds FROM this, so
+# content changes cost attendees only the small code layers, never this.
+#
+# Build:  ./container/build.sh --base
+#
+# Multi-stage, by design. Every third-party tool is fetched and trimmed in a
+# throwaway stage, and the runtime stage copies in only the finished
+# artefacts. That keeps three kinds of weight out of the shipped image:
+#
+#   - the fetch machinery: gnupg, wget, three extra apt repositories and
+#     their keyrings, and the apt package lists each one downloads
+#   - the archives themselves, which otherwise survive inside whichever
+#     layer unpacked them
+#   - the parts of each tool no lab uses — the JDK's jmods/ and src.zip are
+#     134MB on their own, and Node's CHANGELOG.md is 11MB
+#
+# The fetch stages are independent, so buildx runs them in parallel and
+# bumping one tool's version does not re-download the others.
+
+# The runtime floor: debian:trixie-slim, the smallest base that still keeps
+# every tool working. Alpine is not an option — GuardDog pulls in semgrep,
+# which publishes manylinux wheels only, and Temurin's arm64 builds are
+# glibc-only.
+ARG RUNTIME_BASE=debian:trixie-slim
+
+# --- fetch: shared scaffolding for the download stages -----------------------
+FROM ${RUNTIME_BASE} AS fetch
+ARG DEBIAN_FRONTEND=noninteractive
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      ca-certificates curl tar xz-utils \
+    && rm -rf /var/lib/apt/lists/*
+# buildx sets TARGETARCH; the classic builder does not, so fall back to dpkg.
+ARG TARGETARCH
+RUN echo "${TARGETARCH:-$(dpkg --print-architecture)}" > /arch
+
+# --- jdk: Temurin 21, minus everything no lab compiles against ---------------
+# Adoptium's "latest GA for 21" endpoint, which is what the apt package
+# tracked. jmods/ and lib/src.zip only matter to jlink and IDE source
+# lookups; no scenario uses either.
+FROM fetch AS jdk
+RUN arch=$(cat /arch) \
+    && case "$arch" in amd64) a=x64 ;; arm64) a=aarch64 ;; *) echo "unsupported arch: $arch" >&2; exit 1 ;; esac \
+    && mkdir -p /opt/java \
+    && curl -fsSL "https://api.adoptium.net/v3/binary/latest/21/ga/linux/${a}/jdk/hotspot/normal/eclipse" \
+      | tar -xz --strip-components=1 -C /opt/java \
+    && rm -rf /opt/java/jmods /opt/java/lib/src.zip /opt/java/man /opt/java/legal \
+    && /opt/java/bin/javac -version && /opt/java/bin/jar --version
+
+# --- node: Node.js 22 + npm ---------------------------------------------------
+# The official tarball rather than NodeSource: no apt repo, no dpkg overhead,
+# and the fat can be dropped. include/ is 65MB of V8 and libuv headers for
+# node-gyp; nothing here builds a native module (no compiler in the image
+# either), and CHANGELOG.md alone is 11MB.
+FROM fetch AS node
+ARG NODE_VERSION=22.23.2
+RUN arch=$(cat /arch) \
+    && case "$arch" in amd64) a=x64 ;; arm64) a=arm64 ;; *) echo "unsupported arch: $arch" >&2; exit 1 ;; esac \
+    && mkdir -p /opt/node \
+    && curl -fsSL "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-${a}.tar.xz" \
+      | tar -xJ --strip-components=1 -C /opt/node \
+    && rm -rf /opt/node/include /opt/node/CHANGELOG.md \
+         /opt/node/share/doc /opt/node/share/man \
+         /opt/node/lib/node_modules/npm/docs /opt/node/lib/node_modules/npm/man \
+    && /opt/node/bin/node --version \
+    && PATH=/opt/node/bin:$PATH npm --version
+
+# --- tools: Maven, the docker client, and the scanners ------------------------
+# All release binaries. Ubuntu/Debian apt maven is 3.8, too old for the labs.
+# The docker static tarball carries the whole engine; only the client binary
+# is extracted, since the daemon comes from the host socket at run time.
+FROM fetch AS tools
+ARG MAVEN_VERSION=3.9.9
+ARG DOCKER_VERSION=29.7.2
+ARG BUILDX_VERSION=0.37.0
+ARG SCOUT_VERSION=1.24.0
+ARG COSIGN_VERSION=3.1.3
+RUN mkdir -p /opt/maven \
+    && curl -fsSL "https://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz" \
+      | tar -xz --strip-components=1 -C /opt/maven
+
+# docker CLI + buildx. `docker build` delegates to buildx on any current CLI,
+# and a Docker Desktop daemon using the containerd image store has no classic
+# builder to fall back to, so the plugin is not optional (S01, S02, S07, T03).
+RUN arch=$(cat /arch) \
+    && case "$arch" in amd64) da=x86_64 ;; arm64) da=aarch64 ;; *) echo "unsupported arch: $arch" >&2; exit 1 ;; esac \
+    && curl -fsSL "https://download.docker.com/linux/static/stable/${da}/docker-${DOCKER_VERSION}.tgz" \
+      | tar -xz --strip-components=1 -C /usr/local/bin docker/docker \
+    && mkdir -p /usr/libexec/docker/cli-plugins \
+    && curl -fsSL -o /usr/libexec/docker/cli-plugins/docker-buildx \
+      "https://github.com/docker/buildx/releases/download/v${BUILDX_VERSION}/buildx-v${BUILDX_VERSION}.linux-${arch}" \
+    && chmod +x /usr/libexec/docker/cli-plugins/docker-buildx \
+    && docker --version && docker buildx version
+
+# Docker Scout CLI plugin (T02). Direct release download: Scout's install.sh
+# refuses to run without a reachable Docker daemon, and there is never a
+# daemon at image-build time.
+RUN arch=$(cat /arch) \
+    && curl -fsSL "https://github.com/docker/scout-cli/releases/download/v${SCOUT_VERSION}/docker-scout_${SCOUT_VERSION}_linux_${arch}.tar.gz" \
+      | tar -xz -C /usr/libexec/docker/cli-plugins docker-scout \
+    && chmod +x /usr/libexec/docker/cli-plugins/docker-scout \
+    && docker scout version
+
+# cosign (S07 signing + attestation) — static release binary.
+RUN arch=$(cat /arch) \
+    && curl -fsSL -o /usr/local/bin/cosign \
+      "https://github.com/sigstore/cosign/releases/download/v${COSIGN_VERSION}/cosign-linux-${arch}" \
+    && chmod +x /usr/local/bin/cosign \
+    && cosign version
+
+# Snyk CLI (T01) — the standalone release binary, not `npm install -g snyk`.
+# The npm package is a thin wrapper that downloads this same native binary and
+# then keeps the superseded 53MB JavaScript CLI beside it; taking the binary
+# directly drops that dead copy and the wrapper's node_modules.
+RUN arch=$(cat /arch) \
+    && case "$arch" in amd64) s=snyk-linux ;; arm64) s=snyk-linux-arm64 ;; *) echo "unsupported arch: $arch" >&2; exit 1 ;; esac \
+    && curl -fsSL -o /usr/local/bin/snyk "https://downloads.snyk.io/cli/stable/${s}" \
+    && chmod +x /usr/local/bin/snyk \
+    && snyk --version
+
+# syft, grype, trivy — their installers pick the right architecture.
+RUN curl -sSfL https://get.anchore.io/syft  | sh -s -- -b /usr/local/bin \
+    && curl -sSfL https://get.anchore.io/grype | sh -s -- -b /usr/local/bin \
+    && curl -sSfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin \
+    && syft version && grype version && trivy --version
+
+# --- runtime: the tools, with no scanner databases yet ------------------------
+# Named, so `docker build --target runtime` gives a fast tools-only image for
+# checking a version bump before committing to the multi-gigabyte DB refresh.
+FROM ${RUNTIME_BASE} AS runtime
+ARG DEBIAN_FRONTEND=noninteractive
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+# Exactly what scripts/tools-check.sh requires of the system, and nothing
+# else: git, jq, curl, zip/unzip/tar/xz, python3 with pip and venv (S03
+# builds a venv; tools-check asserts `python3 -m pip`), pipx for the two
+# Python CLIs, lsof for the S03 walkthrough. No gnupg, no wget, no apt
+# repositories — the fetch stages needed those, the shipped image does not.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      ca-certificates curl git \
+      jq zip unzip tar xz-utils lsof \
+      python3 python3-pip python3-venv pipx \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=jdk   /opt/java /opt/java
+COPY --from=node  /opt/node /opt/node
+COPY --from=tools /opt/maven /opt/maven
+COPY --from=tools /usr/local/bin/ /usr/local/bin/
+COPY --from=tools /usr/libexec/docker/cli-plugins/ /usr/libexec/docker/cli-plugins/
+
+ENV JAVA_HOME=/opt/java \
+    PATH=/opt/java/bin:/opt/maven/bin:/opt/node/bin:/usr/local/bin:$PATH
+
+# --- pip-audit + GuardDog (pipx, on PATH) ------------------------------------
+# GuardDog (T08) pulls in semgrep; pipx keeps both isolated from the S03 venv
+# and from Debian's externally-managed system python.
+ENV PIPX_BIN_DIR=/usr/local/bin
+ARG GUARDDOG_VERSION=3.2.0
+RUN pipx install pip-audit \
+    && pipx install "guarddog==${GUARDDOG_VERSION}" \
+    && rm -rf /root/.cache/pip \
+    && pip-audit --version && guarddog --version
+
+# --- databases: the scanner data, and the bulk of this image ------------------
+# Last, and in its own stage: refreshing it is the reason to rebuild the base
+# close to workshop day, and it should not invalidate anything above.
+#
+# The DB is as old as the base image, so Grype would otherwise print
+# "WARN current database is invalid ... built N days ago" on every scan and
+# try to re-download it over the workshop network. Trust the baked copy.
+FROM runtime
+ENV GRYPE_DB_VALIDATE_AGE=false \
+    GRYPE_DB_AUTO_UPDATE=false
+RUN grype db update \
+    && trivy image --download-db-only \
+    && trivy image --download-java-db-only \
+    && grype db status
+
+CMD ["/bin/bash"]

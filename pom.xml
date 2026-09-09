@@ -1,0 +1,807 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>dev.noregressions.trace</groupId>
+    <artifactId>manual</artifactId>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+
+    <name>Software Supply Chain Trace Lab Manual</name>
+
+    <!--
+        The canonical home for "where does this project live". Declaring it
+        here gives the build ${project.scm.url}, which the book's repoUrl var
+        below is filled from, so the URL is written down once.
+
+        If you would rather derive it from the actual git remote than declare
+        it, git-commit-id-maven-plugin exposes ${git.remote.origin.url} — but
+        that needs a .git directory at build time, and the book has to build
+        from a source export too.
+    -->
+    <scm>
+        <url>https://github.com/noregressions/ydkwys</url>
+        <connection>scm:git:https://github.com/noregressions/ydkwys.git</connection>
+        <developerConnection>scm:git:git@github.com:noregressions/ydkwys.git</developerConnection>
+    </scm>
+
+
+    <properties>
+        <java.version>21</java.version>
+        <maven.compiler.release>${java.version}</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    </properties>
+
+
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>dev.noregressions.paperband</groupId>
+                <artifactId>paperband-maven-plugin</artifactId>
+                <version>0.1.2</version>
+
+                <!--
+                    Shared by every goal: what the book is, and how it renders.
+                    Both executions below read this, and so does an ad-hoc
+                    `mvn paperband:structure` — which then describes exactly the
+                    book the PDF and site are built from.
+                -->
+                <configuration>
+                    <!--
+                        The book's own pieces live at the conventional home,
+                        src/main/paperband/: layouts/ carries the page
+                        header/footer templates and the diagnostics page,
+                        assets/ the cover image. Content stays scattered
+                        across the repo (setup/, workshop/, scenarios/, ...)
+                        and is selected by the <sections> globs below,
+                        which resolve against the <book><root> declared in
+                        each book.
+                    -->
+                    <theme>noregressions</theme>
+                    <!--
+                        The kind layer: scenario walkthroughs and tool
+                        investigations get distinct identity furniture (badge,
+                        title rule, section markers, command fences) on top of
+                        the theme. The axis that drives it is declared inside
+                        each <book> below.
+                    -->
+                    <stylesheets>
+                        <stylesheet>src/main/paperband/styles/kind.css</stylesheet>
+                        <stylesheet>src/main/paperband/styles/diagrams.css</stylesheet>
+                        <stylesheet>src/main/paperband/styles/fences.css</stylesheet>
+                        <stylesheet>src/main/paperband/styles/command-output.css</stylesheet>
+                        <stylesheet>src/main/paperband/styles/screen.css</stylesheet>
+                    </stylesheets>
+                    <!--
+                        US Letter, with real margins: Chromium draws the
+                        header/footer templates inside the page margin, so a
+                        full-bleed margin of 0 would make them invisible.
+                    -->
+                    <pageSize>letter</pageSize>
+                    <!--
+                    <margins>14 12</margins>
+                    -->
+                    <book>
+                        <!--
+                            Content lives scattered across the repo (setup/,
+                            workshop/, scenarios/, ...), so the patterns in
+                            <sections> below resolve against the module
+                            basedir. Declared, not inferred: an undeclared
+                            <root> now follows the same convention as every
+                            other way of naming a book and lands on the book
+                            home, src/main/paperband/ — which holds only
+                            layouts/, styles/ and assets/, and no cards.
+                        -->
+                        <root>${project.basedir}</root>
+
+                        <index>auto</index>
+                        <cover>
+                            <!-- Relative to the book home, src/main/paperband/. -->
+                            <image>assets/kcdc2026-cover.jpeg</image>
+                            <fullPage>true</fullPage>
+                            </cover>
+                        <title>You Don't Know What You're Shipping</title>
+                        <header>
+                            <template>page-header</template>
+                        </header>
+                        <footer>
+                            <template>page-footer</template>
+                        </footer>
+                        <!--
+                            Static-site navigator: a sidebar listing every section and
+                            the cards under it. Opt-in, and worth having at 21 cards —
+                            it also fills the left of a wide window, which the
+                            twelve-section top nav alone does not.
+
+                            An element of <book>, not a var: the vars spelling
+                            (<vars><sidebar>true</sidebar></vars>) is the older API and a
+                            POM book never reaches the fallback that still honours it in
+                            yaml, so it silently produced no sidebar at all. Declaring the
+                            element is the opt-in; add <sectionsCollapsed>false</sectionsCollapsed>
+                            to ship every section expanded rather than click-to-open.
+                        -->
+                        <sidebar/>
+                        <vars>
+                            <subtitle>Workshop</subtitle>
+                            <!--
+                                Filled from <scm><url> above; reference in a card as
+                                {{ vars.repoUrl }}.
+
+                                One hard limit: vars expand in prose only, never in
+                                code — not in a fence, not in an inline span. That is
+                                correct rather than a bug, because the book contains
+                                Docker format strings like {{.Id}} that must survive
+                                verbatim. A `git clone` line therefore cannot be
+                                templated, and setup/01 getting-started.md and
+                                setup/BUILD-MANUAL.md have to carry the URL literally.
+
+                                So those two clone lines are the only places the URL
+                                is written out by hand. If the repository ever moves,
+                                grep for the old name: the POM value above and those two
+                                lines are all there is to change.
+                            -->
+                            <repoUrl>${project.scm.url}</repoUrl>
+                            <!--
+                            <authors><author>Steve Poole</author>
+                                <author>Brian Vermeer</author></authors>
+                            -->
+                            <!-- Mermaid diagrams in the greyscale that matches
+                                 the noregressions ink/grey system; colour in
+                                 this book is semantic, and diagrams aren't. -->
+                            <mermaidTheme>neutral</mermaidTheme>
+                        </vars>
+                        <!--
+                            The kind axis: is this card a scenario walkthrough
+                            (build and trace) or a tool investigation (point an
+                            instrument at a boundary)? Valued per folder by
+                            scenarios/paperband.yaml and
+                            investigations/paperband.yaml, so cards need no
+                            frontmatter of their own; workshop/ and setup/
+                            cards have no kind and keep the plain theme voice.
+                            Styling lives in the kind.css stylesheet above.
+                        -->
+                        <axes>
+                            <axis>
+                                <name>kind</name>
+                                <title>Kind</title>
+                                <!-- Label-only: classes, badges and site
+                                     landing pages, but no divider pages —
+                                     the Parts and appendices are the book's
+                                     structure, not the kinds. -->
+                                <dividers>false</dividers>
+                                <values>
+                                    <value>
+                                        <id>scenario</id>
+                                        <label>Scenario</label>
+                                    </value>
+                                    <value>
+                                        <id>investigation</id>
+                                        <label>Investigation</label>
+                                    </value>
+                                </values>
+                            </axis>
+                        </axes>
+                        <sections>
+                            <section>
+                                <landingPage>false</landingPage>
+                                <title>Welcome</title>
+                                <includes>
+                                    <include>setup/frontpiece.md</include>
+                                </includes>
+                            </section>
+
+                            <toc/>
+
+                            <!--
+                                The book is the workshop: one section per part, each
+                                chapter followed by the labs it uses, then appendices
+                                for everything off the timed route. Explicit includes
+                                throughout, because order is meaning here and globs
+                                sweep. Parts 1 to 6 are the four acts:
+                                1-2 identification, 3-4 the data over the top of it,
+                                5 deliberate abuse of both, 6 what you do every release.
+                            -->
+                            <section>
+                                <title>Introduction and Setup</title>
+                                <includes>
+                                    <include>setup/00 about.md</include>
+                                    <include>setup/01 getting-started.md</include>
+                                    <include>setup/02 tools.md</include>
+                                    <include>setup/03 ACCOUNTS-AND-KEYS.md</include>
+                                    <include>setup/04 BUILDING.md</include>
+                                </includes>
+                            </section>
+                            <section>
+                                <title>Part 1 — What Is Actually in Our Software?</title>
+                                <includes>
+                                    <include>workshop/01-supply-chain.md</include>
+                                </includes>
+                            </section>
+                            <section>
+                                <title>Part 2 — Can We Identify What We Ship?</title>
+                                <!--
+                                    Lab order follows the timed route in the chapter: S01
+                                    transformations, S04 plugin realms, S05 hooks, S03
+                                    S08 (the SBOM that does see S04's plugin), S05 hooks,
+                                    S03 backends, S02 as the everything-at-once Jakarta EE
+                                    case, then T01 as the scanner test. S02 and S08 were an
+                                    Optional Labs appendix until 2026-09-08; they are core
+                                    route now, so that appendix is gone.
+                                -->
+                                <includes>
+                                    <include>workshop/02-identification.md</include>
+                                    <include>scenarios/S01-spring-node/LESSON.md</include>
+                                    <include>scenarios/S04-maven-plugin-hidden-content/LESSON.md</include>
+                                    <include>scenarios/S08-extended-sbom/LESSON.md</include>
+                                    <include>scenarios/S05-node-prepack/LESSON.md</include>
+                                    <include>scenarios/S03-python-pep517/LESSON.md</include>
+                                    <include>scenarios/S02-payara-mvnpm/LESSON.md</include>
+                                    <include>investigations/T01-snyk-beyond-sbom/LESSON.md</include>
+                                </includes>
+                            </section>
+                            <section>
+                                <title>Part 3 — What Does a CVE Finding Actually Mean?</title>
+                                <!--
+                                    The Ghostcat investigation is the worked example the
+                                    chapter routes into, so it has to be in the book the
+                                    reader is holding.
+                                -->
+                                <includes>
+                                    <include>workshop/03-vulnerabilities.md</include>
+                                    <include>investigations/T10-cve-tomcat-85/LESSON.md</include>
+                                    <include>workshop/cve-propagation/01-cve-is-not-a-graph.md</include>
+                                    <include>workshop/cve-propagation/04-scanner-classes.md</include>
+                                    <include>workshop/cve-propagation/05-database-comparison.md</include>
+                                    <include>investigations/T09-three-scanners-s01/LESSON.md</include>
+                                </includes>
+                            </section>
+                            <section>
+                                <title>Part 4 — CVEs Aren't Enough</title>
+                                <includes>
+                                    <include>workshop/04-project-health-eol.md</include>
+                                    <include>workshop/cve-propagation/02-old-release-policies.md</include>
+                                    <include>workshop/cve-propagation/03-forks-and-derivatives.md</include>
+                                    <include>workshop/cve-propagation/06-what-this-means.md</include>
+                                </includes>
+                            </section>
+                            <section>
+                                <title>Part 5 — Someone Is Counting on That</title>
+                                <!--
+                                    Both labs were previously in neither edition while the
+                                    chapter asserted their findings.
+                                -->
+                                <includes>
+                                    <include>workshop/05-attacks-and-provenance.md</include>
+                                    <include>investigations/T08-guarddog/LESSON.md</include>
+                                    <include>scenarios/S07-provenance-s01/LESSON.md</include>
+                                </includes>
+                            </section>
+                            <section>
+                                <title>Part 6 — The Minimum That Keeps You Honest</title>
+                                <includes>
+                                    <include>workshop/06-minimum-practice.md</include>
+                                </includes>
+                            </section>
+                            <section>
+                                <title>Appendix — The Tools</title>
+                                <includes>
+                                    <include>reference/tools.md</include>
+                                </includes>
+                            </section>
+                            <section>
+                                <title>Appendix — Vulnerability Data Sources</title>
+                                <includes>
+                                    <include>workshop/cve-propagation/07-sources.md</include>
+                                </includes>
+                            </section>
+                            <section>
+                                <title>Appendix — AI and the Supply Chain</title>
+                                <!--
+                                    Parked while the AI strand is out of scope for the
+                                    session. Kept as an appendix rather than deleted, so the
+                                    running order stays four acts.
+                                -->
+                                <includes>
+                                    <include>workshop/appendix-ai-dependencies.md</include>
+                                </includes>
+                            </section>
+                            <section>
+                                <title>Appendix — Reference Investigations</title>
+                                <!--
+                                    Site only: too long for the printed manual, and off the
+                                    timed route. T08 is not here because Part 5 now carries
+                                    it as a core lab.
+                                -->
+                                <includes>
+                                    <include>investigations/T02-docker-scout/LESSON.md</include>
+                                    <include>investigations/T03-trivy-s01/LESSON.md</include>
+                                    <include>investigations/T04-grype-s02/LESSON.md</include>
+                                    <include>investigations/T05-pip-audit-s03/LESSON.md</include>
+                                    <include>investigations/T06-owasp-dependency-check-s04/LESSON.md</include>
+                                    <include>investigations/T07-npm-audit-s05/LESSON.md</include>
+                                </includes>
+                            </section>
+                        </sections>
+                    </book>
+                </configuration>
+
+                <executions>
+                    <!-- Each execution contributes only where its output goes. -->
+                    <execution>
+                        <id>pdf</id>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                        <configuration>
+                            <output>${project.build.directory}/book.pdf</output>
+                            <!-- The pre-renderer HTML, for checking what the
+                                 layout actually produced (card classes,
+                                 badges, dividers) without opening the PDF. -->
+                            <emitHtml>${project.build.directory}/book.html</emitHtml>
+                            <!--
+                                The printed book is the workshop handout: the whole
+                                timed route plus the reference appendices.
+                                combine.self="override" replaces the shared <book>
+                                wholesale (Maven merging would otherwise splice the
+                                two section lists positionally), so this is a full
+                                copy of the shared book minus the Reference
+                                Investigations section — that stays in the site
+                                edition above. Keep the two copies' common parts
+                                in step when editing either.
+                            -->
+                            <book combine.self="override">
+                                <!-- Kept in step with the shared book's root above. -->
+                                <root>${project.basedir}</root>
+
+                                <index>auto</index>
+                                <cover>
+                                    <image>assets/kcdc2026-cover.jpeg</image>
+                                    <fullPage>true</fullPage>
+                                </cover>
+                                <title>You Don't Know What You're Shipping</title>
+                                <header>
+                                    <template>page-header</template>
+                                </header>
+                                <footer>
+                                    <template>page-footer</template>
+                                </footer>
+                                <!-- Kept in step with the shared book above; the
+                                     PDF has no sidebar to draw. -->
+                                <sidebar/>
+                                <vars>
+                                    <subtitle>KCDC 2026 Workshop</subtitle>
+                                    <!-- Filled from <scm><url> above; reference as {{ vars.repoUrl }}. -->
+                                    <repoUrl>${project.scm.url}</repoUrl>
+                                    <mermaidTheme>neutral</mermaidTheme>
+                                </vars>
+                                <!-- Kept in step with the shared book's kind axis above. -->
+                                <axes>
+                                    <axis>
+                                        <name>kind</name>
+                                        <title>Kind</title>
+                                        <dividers>false</dividers>
+                                        <values>
+                                            <value>
+                                                <id>scenario</id>
+                                                <label>Scenario</label>
+                                            </value>
+                                            <value>
+                                                <id>investigation</id>
+                                                <label>Investigation</label>
+                                            </value>
+                                        </values>
+                                    </axis>
+                                </axes>
+                                <sections>
+                                    <section>
+                                        <landingPage>false</landingPage>
+                                        <title>Welcome</title>
+                                        <includes>
+                                            <include>setup/frontpiece.md</include>
+                                        </includes>
+                                    </section>
+
+                                    <toc/>
+
+                                    <!--
+                                        The book is the workshop: one section per part, each
+                                        chapter followed by the labs it uses, then appendices
+                                        for everything off the timed route. Explicit includes
+                                        throughout, because order is meaning here and globs
+                                        sweep. Parts 1 to 6 are the four acts:
+                                        1-2 identification, 3-4 the data over the top of it,
+                                        5 deliberate abuse of both, 6 what you do every release.
+                                    -->
+                                    <section>
+                                        <title>Introduction and Setup</title>
+                                        <includes>
+                                            <include>setup/00 about.md</include>
+                                            <include>setup/01 getting-started.md</include>
+                                            <include>setup/02 tools.md</include>
+                                            <include>setup/03 ACCOUNTS-AND-KEYS.md</include>
+                                            <include>setup/04 BUILDING.md</include>
+                                        </includes>
+                                    </section>
+                                    <section>
+                                        <title>Part 1 — What Is Actually in Our Software?</title>
+                                        <includes>
+                                            <include>workshop/01-supply-chain.md</include>
+                                        </includes>
+                                    </section>
+                                    <section>
+                                        <title>Part 2 — Can We Identify What We Ship?</title>
+                                        <!--
+                                            Lab order follows the timed route in the chapter: S01
+                                            transformations, S04 plugin realms, S05 hooks, S03
+                                            S08 (the SBOM that does see S04's plugin), S05 hooks,
+                                            S03 backends, S02 as the everything-at-once Jakarta EE
+                                            case, then T01 as the scanner test. S02 and S08 were an
+                                            Optional Labs appendix until 2026-09-08; they are core
+                                            route now, so that appendix is gone.
+                                        -->
+                                        <includes>
+                                            <include>workshop/02-identification.md</include>
+                                            <include>scenarios/S01-spring-node/LESSON.md</include>
+                                            <include>scenarios/S04-maven-plugin-hidden-content/LESSON.md</include>
+                                            <include>scenarios/S08-extended-sbom/LESSON.md</include>
+                                            <include>scenarios/S05-node-prepack/LESSON.md</include>
+                                            <include>scenarios/S03-python-pep517/LESSON.md</include>
+                                            <include>scenarios/S02-payara-mvnpm/LESSON.md</include>
+                                            <include>investigations/T01-snyk-beyond-sbom/LESSON.md</include>
+                                        </includes>
+                                    </section>
+                                    <section>
+                                        <title>Part 3 — What Does a CVE Finding Actually Mean?</title>
+                                        <!--
+                                            The Ghostcat investigation is the worked example the
+                                            chapter routes into, so it has to be in the book the
+                                            reader is holding.
+                                        -->
+                                        <includes>
+                                            <include>workshop/03-vulnerabilities.md</include>
+                                            <include>investigations/T10-cve-tomcat-85/LESSON.md</include>
+                                            <include>workshop/cve-propagation/01-cve-is-not-a-graph.md</include>
+                                            <include>workshop/cve-propagation/04-scanner-classes.md</include>
+                                            <include>workshop/cve-propagation/05-database-comparison.md</include>
+                                            <include>investigations/T09-three-scanners-s01/LESSON.md</include>
+                                        </includes>
+                                    </section>
+                                    <section>
+                                        <title>Part 4 — CVEs Aren't Enough</title>
+                                        <includes>
+                                            <include>workshop/04-project-health-eol.md</include>
+                                            <include>workshop/cve-propagation/02-old-release-policies.md</include>
+                                            <include>workshop/cve-propagation/03-forks-and-derivatives.md</include>
+                                            <include>workshop/cve-propagation/06-what-this-means.md</include>
+                                        </includes>
+                                    </section>
+                                    <section>
+                                        <title>Part 5 — Someone Is Counting on That</title>
+                                        <!--
+                                            Both labs were previously in neither edition while the
+                                            chapter asserted their findings.
+                                        -->
+                                        <includes>
+                                            <include>workshop/05-attacks-and-provenance.md</include>
+                                            <include>investigations/T08-guarddog/LESSON.md</include>
+                                            <include>scenarios/S07-provenance-s01/LESSON.md</include>
+                                        </includes>
+                                    </section>
+                                    <section>
+                                        <title>Part 6 — The Minimum That Keeps You Honest</title>
+                                        <includes>
+                                            <include>workshop/06-minimum-practice.md</include>
+                                        </includes>
+                                    </section>
+                                    <section>
+                                        <title>Appendix — The Tools</title>
+                                        <includes>
+                                            <include>reference/tools.md</include>
+                                        </includes>
+                                    </section>
+                                    <section>
+                                        <title>Appendix — Vulnerability Data Sources</title>
+                                        <includes>
+                                            <include>workshop/cve-propagation/07-sources.md</include>
+                                        </includes>
+                                    </section>
+                                    <section>
+                                        <title>Appendix — AI and the Supply Chain</title>
+                                        <!--
+                                            Parked while the AI strand is out of scope for the
+                                            session. Kept as an appendix rather than deleted, so the
+                                            running order stays four acts.
+                                        -->
+                                        <includes>
+                                            <include>workshop/appendix-ai-dependencies.md</include>
+                                        </includes>
+                                    </section>
+                                </sections>
+                            </book>
+                        </configuration>
+                    </execution>
+                    <!--
+                        The cheat-sheet edition: the route-ordered cheatsheet/ cards on
+                        their own, as a PDF to print and lay beside the keyboard
+                        and a site to keep in a browser tab. Nothing narrative —
+                        every command of every lab in run order, with the output
+                        it should produce. Its own edition rather than an
+                        appendix of the manual, because the point is to have it
+                        open *while* working through a lab, not to page past the
+                        prose to reach it.
+
+                        Three executions below share one book declaration, and
+                        Maven has no way to name a <book> once and reuse it, so
+                        the declaration is copied into each. Keep the three
+                        copies in step when editing any of them.
+                    -->
+                    <execution>
+                        <id>cheatsheets-pdf</id>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                        <configuration>
+                            <output>${project.build.directory}/cheatsheets.pdf</output>
+                            <emitHtml>${project.build.directory}/cheatsheets.html</emitHtml>
+                            <book combine.self="override">
+                                <root>${project.basedir}</root>
+                                <index>auto</index>
+                                <cover>
+                                    <image>assets/kcdc2026-cover.jpeg</image>
+                                    <fullPage>true</fullPage>
+                                </cover>
+                                <title>You Don't Know What You're Shipping — Cheat Sheets</title>
+                                <header>
+                                    <template>page-header</template>
+                                </header>
+                                <footer>
+                                    <template>page-footer</template>
+                                </footer>
+                                <sidebar/>
+                                <vars>
+                                    <subtitle>KCDC 2026 Workshop — Command Reference</subtitle>
+                                    <!-- Filled from <scm><url> above; reference as {{ vars.repoUrl }}. -->
+                                    <repoUrl>${project.scm.url}</repoUrl>
+                                    <mermaidTheme>neutral</mermaidTheme>
+                                </vars>
+                                <!--
+                                    The kind axis again, so the two cards keep the
+                                    identity they have in the manual: scenario blue
+                                    for the lab commands, instrument violet for the
+                                    tool runs. Valued by the folder yaml files, as
+                                    in the manual.
+                                -->
+                                <axes>
+                                    <axis>
+                                        <name>kind</name>
+                                        <title>Kind</title>
+                                        <dividers>false</dividers>
+                                        <values>
+                                            <value>
+                                                <id>scenario</id>
+                                                <label>Scenario</label>
+                                            </value>
+                                            <value>
+                                                <id>investigation</id>
+                                                <label>Investigation</label>
+                                            </value>
+                                        </values>
+                                    </axis>
+                                </axes>
+                                <!--
+                                    One section holding both cards: at two cards a
+                                    section apiece would be section furniture around
+                                    single entries, and the card titles already say
+                                    which sheet you are on.
+                                -->
+                                <sections>
+                                    <toc/>
+                                    <section>
+                                        <title>Cheat Sheets</title>
+                                        <includes>
+                                            <include>cheatsheet/00-setup.md</include>
+                                            <include>cheatsheet/01-part2-identify.md</include>
+                                            <include>cheatsheet/02-part3-cve.md</include>
+                                            <include>cheatsheet/03-part4-health.md</include>
+                                            <include>cheatsheet/04-part5-attacks.md</include>
+                                            <include>cheatsheet/05-part6-drill.md</include>
+                                            <include>cheatsheet/06-off-route.md</include>
+                                        </includes>
+                                    </section>
+                                </sections>
+                            </book>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>cheatsheets-site</id>
+                        <goals>
+                            <goal>site</goal>
+                        </goals>
+                        <configuration>
+                            <!-- Its own tree, not a subdirectory of the manual's
+                                 site: <clean>true</clean> on either build would
+                                 otherwise sweep the other's card pages. -->
+                            <outputDirectory>${project.build.directory}/cheatsheets-site</outputDirectory>
+                            <clean>true</clean>
+                            <book combine.self="override">
+                                <root>${project.basedir}</root>
+                                <index>auto</index>
+                                <cover>
+                                    <image>assets/kcdc2026-cover.jpeg</image>
+                                    <fullPage>true</fullPage>
+                                </cover>
+                                <title>You Don't Know What You're Shipping — Cheat Sheets</title>
+                                <header>
+                                    <template>page-header</template>
+                                </header>
+                                <footer>
+                                    <template>page-footer</template>
+                                </footer>
+                                <sidebar/>
+                                <vars>
+                                    <subtitle>KCDC 2026 Workshop — Command Reference</subtitle>
+                                    <!-- Filled from <scm><url> above; reference as {{ vars.repoUrl }}. -->
+                                    <repoUrl>${project.scm.url}</repoUrl>
+                                    <mermaidTheme>neutral</mermaidTheme>
+                                </vars>
+                                <axes>
+                                    <axis>
+                                        <name>kind</name>
+                                        <title>Kind</title>
+                                        <dividers>false</dividers>
+                                        <values>
+                                            <value>
+                                                <id>scenario</id>
+                                                <label>Scenario</label>
+                                            </value>
+                                            <value>
+                                                <id>investigation</id>
+                                                <label>Investigation</label>
+                                            </value>
+                                        </values>
+                                    </axis>
+                                </axes>
+                                <sections>
+                                    <toc/>
+                                    <section>
+                                        <title>Cheat Sheets</title>
+                                        <includes>
+                                            <include>cheatsheet/00-setup.md</include>
+                                            <include>cheatsheet/01-part2-identify.md</include>
+                                            <include>cheatsheet/02-part3-cve.md</include>
+                                            <include>cheatsheet/03-part4-health.md</include>
+                                            <include>cheatsheet/04-part5-attacks.md</include>
+                                            <include>cheatsheet/05-part6-drill.md</include>
+                                            <include>cheatsheet/06-off-route.md</include>
+                                        </includes>
+                                    </section>
+                                </sections>
+                            </book>
+                        </configuration>
+                    </execution>
+                    <!--
+                        And again on Maven's `site` phase, for the same reason the
+                        manual's site-lifecycle execution exists: `mvn site` runs
+                        only the reporting lifecycle, which never reaches
+                        process-resources.
+                    -->
+                    <execution>
+                        <id>cheatsheets-site-lifecycle</id>
+                        <phase>site</phase>
+                        <goals>
+                            <goal>site</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/cheatsheets-site</outputDirectory>
+                            <clean>true</clean>
+                            <book combine.self="override">
+                                <root>${project.basedir}</root>
+                                <index>auto</index>
+                                <cover>
+                                    <image>assets/kcdc2026-cover.jpeg</image>
+                                    <fullPage>true</fullPage>
+                                </cover>
+                                <title>You Don't Know What You're Shipping — Cheat Sheets</title>
+                                <header>
+                                    <template>page-header</template>
+                                </header>
+                                <footer>
+                                    <template>page-footer</template>
+                                </footer>
+                                <sidebar/>
+                                <vars>
+                                    <subtitle>KCDC 2026 Workshop — Command Reference</subtitle>
+                                    <!-- Filled from <scm><url> above; reference as {{ vars.repoUrl }}. -->
+                                    <repoUrl>${project.scm.url}</repoUrl>
+                                    <mermaidTheme>neutral</mermaidTheme>
+                                </vars>
+                                <axes>
+                                    <axis>
+                                        <name>kind</name>
+                                        <title>Kind</title>
+                                        <dividers>false</dividers>
+                                        <values>
+                                            <value>
+                                                <id>scenario</id>
+                                                <label>Scenario</label>
+                                            </value>
+                                            <value>
+                                                <id>investigation</id>
+                                                <label>Investigation</label>
+                                            </value>
+                                        </values>
+                                    </axis>
+                                </axes>
+                                <sections>
+                                    <toc/>
+                                    <section>
+                                        <title>Cheat Sheets</title>
+                                        <includes>
+                                            <include>cheatsheet/00-setup.md</include>
+                                            <include>cheatsheet/01-part2-identify.md</include>
+                                            <include>cheatsheet/02-part3-cve.md</include>
+                                            <include>cheatsheet/03-part4-health.md</include>
+                                            <include>cheatsheet/04-part5-attacks.md</include>
+                                            <include>cheatsheet/05-part6-drill.md</include>
+                                            <include>cheatsheet/06-off-route.md</include>
+                                        </includes>
+                                    </section>
+                                </sections>
+                            </book>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>site</id>
+                        <goals>
+                            <goal>site</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/site</outputDirectory>
+                            <!-- Drop stale card pages when a card is removed or renamed. -->
+                            <clean>true</clean>
+                        </configuration>
+                    </execution>
+                    <!--
+                        The same goal again, on Maven's `site` phase, so
+                        `mvn site` builds the book's site too. Without this
+                        `mvn site` runs only Maven's own reporting lifecycle,
+                        which has nothing to do with this book (see the
+                        maven-site-plugin entry below).
+                    -->
+                    <execution>
+                        <id>site-lifecycle</id>
+                        <phase>site</phase>
+                        <goals>
+                            <goal>site</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/site</outputDirectory>
+                            <clean>true</clean>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!--
+                `mvn site` means Maven's reporting lifecycle, not this book.
+                This project is documentation: no Java, no dependency reports
+                worth publishing, and project-info-reports 3.9.0 fails outright
+                against the Doxia the current site plugin ships. Pinned (an
+                unpinned version warns) and skipped, which leaves the `site`
+                phase to the book's own site execution above.
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>3.12.1</version>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
